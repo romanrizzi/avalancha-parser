@@ -1,0 +1,9 @@
+
+-- Feature específica del parser cuando hay una expresión sola
+
+-- Lo siguiente:
+            check f()
+
+-- Debería dar lo mismo que lo siguiente:
+            check f() == True
+

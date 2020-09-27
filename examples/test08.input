@@ -1,0 +1,23 @@
+
+-- Conjunción
+
+check A and B 
+check A and B and C
+check A and B and C and D
+check not A and not B and not C and not D
+
+check A1==A2 and B1==B2
+check A1==A2 and B1==B2 and C1==C2
+check A1==A2 and B1==B2 and C1==C2 and D1==D2
+check not A1==A2 and not B1==B2 and not C1==C2 and not D1==D2
+
+check A and B 
+check (A and B) and C
+check A and (B and C) and D
+check not ((A and not (B and not C)) and not D)
+
+check A1==A2 and B1==B2
+check A1==A2 and (B1==B2 and C1==C2)
+check ((A1==A2 and B1==B2) and C1==C2) and D1==D2
+check not (A1==A2 and not (B1==B2 and not (C1==C2 and not (D1==D2))))
+

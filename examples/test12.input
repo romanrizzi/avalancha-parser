@@ -1,0 +1,25 @@
+
+-- Funciones (signatura sin reglas)
+
+fun foo1 -- sin signatura ni reglas (tiene aridad 0)
+
+-- con signatura sin reglas, aridad 0
+fun foo2 : -> _
+fun foo3 : -> xx
+
+-- con signatura sin reglas, aridad 1
+fun foo4 : _ -> _
+fun foo5 : x -> _
+fun foo6 : _ -> y
+fun foo7 : x -> y
+
+-- con signatura sin reglas, aridad 2
+fun foo8:_,_->_
+fun foo9:x,_->_
+fun foo10:_,y->_
+fun foo11:x,y->_
+fun foo12:_,_->z
+fun foo13:x,_->z
+fun foo14:_,y->z
+fun foo15:x,y->z
+

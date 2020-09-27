@@ -1,0 +1,35 @@
+
+-- Invocaciones a funciones
+
+check f() == f
+
+check f(f) == g(H) -- un parámetro
+
+-- varios parámetros
+check a(b) == f(f)
+
+-- Constructores
+check zero() == zero()  -- sin parámetros (con paréntesis)
+
+-- con un parámetro
+check suc(zero) == suc(  zero  )
+
+-- con varios parámetros
+check a(b) == a(B)
+check a(b,C) == a(B,c)
+check a(b,C,D) == a(B,c,d)
+check a(B,C,d,e) == a(B,c,d,e)
+
+-- Recursivos
+check a(b(c(d(e(f))))) == a(b(c(d(e(F)))))
+
+check a(b(c),d(E,f(g))) == a(b(c),d(E,f(g)))
+
+check sUC (
+  sUC(zERO
+)) == sUC(sUC(     zERO ) )
+
+check cONS (a,cONS(b,cONS(
+  c,conS(d,
+  nIL)))) == cONS(a,cONS(b,cONS(c,cONS(d,      nIL))))
+

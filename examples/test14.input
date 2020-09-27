@@ -1,0 +1,44 @@
+
+-- Funciones (reglas)
+
+fun cero -> Zero
+
+fun neg
+  True  -> False
+  False -> True
+
+fun yy
+  True  , x -> x
+  False , _ -> False
+
+fun esNat
+  Zero   -> True
+  Suc(n) -> esNat(n)
+  _      -> False
+
+fun esLista
+  Nil         -> True
+  Cons(_, xs) -> esLista(xs)
+  _           -> False
+
+fun esVacia 
+  Nil -> True
+  _   -> False
+
+fun length
+  : entrada -> resultado
+  ? esLista(entrada)
+  ! esNat(resultado)
+  Nil         -> Zero
+  Cons(_, xs) -> Suc(length(xs))
+
+fun head
+  : entrada -> resultado
+
+  ? esLista(entrada) and not esVacia(entrada)
+
+  ! esNat(resultado) and
+    longitud(entrada) == Suc(longitud(resultado))
+
+  Cons(_, xs) -> xs
+

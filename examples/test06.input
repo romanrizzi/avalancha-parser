@@ -1,0 +1,22 @@
+
+-- Paréntesis
+
+check foo
+check foo
+
+
+==bar
+
+
+check (foo)
+check ((foo))
+check (((((foo)))))
+
+check (foo
+==bar
+)
+
+check (((((foo
+==bar
+)))))
+

@@ -1,0 +1,16 @@
+
+-- Negación
+
+check foo
+check not foo
+check not not foo
+
+check foo == bar
+check not foo == bar
+check not not foo == bar
+
+check ((not (foo)))
+check (not (not foo))
+check (not (foo == bar))
+check not (not foo == bar)
+

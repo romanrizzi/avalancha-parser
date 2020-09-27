@@ -1,0 +1,23 @@
+
+-- Implicación
+
+check A imp B 
+check A imp B imp C
+check A imp B imp C imp D
+check not A imp not B imp not C imp not D
+
+check A1==A2 imp B1==B2
+check A1==A2 imp B1==B2 imp C1==C2
+check A1==A2 imp B1==B2 imp C1==C2 imp D1==D2
+check not A1==A2 imp not B1==B2 imp not C1==C2 imp not D1==D2
+
+check A imp B 
+check (A imp B) imp C
+check A imp (B imp C) imp D
+check not ((A imp not (B imp not C)) imp not D)
+
+check A1==A2 imp B1==B2
+check A1==A2 imp (B1==B2 imp C1==C2)
+check ((A1==A2 imp B1==B2) imp C1==C2) imp D1==D2
+check not (A1==A2 imp not (B1==B2 imp not (C1==C2 imp not (D1==D2))))
+

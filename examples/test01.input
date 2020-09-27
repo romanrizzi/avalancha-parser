@@ -1,0 +1,11 @@
+check true         -- verdadero
+check false        -- falso
+
+-- Igualdad entre variables
+check foo == bar
+
+check
+abcdefghijklmnopqrstuvwxyz_1234567890
+==
+a0987654321_zyxwvutsrqponmlkjihgfedcb
+

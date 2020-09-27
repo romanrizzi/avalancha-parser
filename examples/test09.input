@@ -1,0 +1,23 @@
+
+-- Disyunción
+
+check A or B 
+check A or B or C
+check A or B or C or D
+check not A or not B or not C or not D
+
+check A1==A2 or B1==B2
+check A1==A2 or B1==B2 or C1==C2
+check A1==A2 or B1==B2 or C1==C2 or D1==D2
+check not A1==A2 or not B1==B2 or not C1==C2 or not D1==D2
+
+check A or B 
+check (A or B) or C
+check A or (B or C) or D
+check not ((A or not (B or not C)) or not D)
+
+check A1==A2 or B1==B2
+check A1==A2 or (B1==B2 or C1==C2)
+check ((A1==A2 or B1==B2) or C1==C2) or D1==D2
+check not (A1==A2 or not (B1==B2 or not (C1==C2 or not (D1==D2))))
+

@@ -11,4 +11,5 @@ group :development do
   gem 'rubocop', require: false
 end
 
+gem 'json'
 gem 'rltk'

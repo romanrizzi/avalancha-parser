@@ -6,6 +6,7 @@ GEM
     diff-lcs (1.4.4)
     ffi (1.13.1)
     filigree (0.4.1)
+    json (2.3.1)
     parallel (1.19.2)
     parser (2.7.1.5)
       ast (~> 2.4.1)
@@ -47,6 +48,7 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
+  json
   rltk
   rspec
   rubocop

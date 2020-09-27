@@ -1,0 +1,27 @@
+
+-- Constructores
+check Zero == Zero      -- sin parámetros
+check Zero() == Zero()  -- sin parámetros (con paréntesis)
+
+-- con un parámetro
+check Suc(Zero) == Suc(  Zero  )
+
+-- con varios parámetros
+check A(B) == A(b)
+check A(B,c) == A(b,C)
+check A(B,c,d) == A(b,C,D)
+check A(b,c,D,E) == A(b,C,D,E)
+
+-- Recursivos
+check A(B(C(D(E(F))))) == A(B(C(D(E(f)))))
+
+check A(B(C),D(e,F(G))) == A(B(C),D(e,F(G)))
+
+check Suc (
+  Suc(Zero
+)) == Suc(Suc(     Zero ) )
+
+check Cons (A,Cons(B,Cons(
+  C,Cons(D,
+  Nil)))) == Cons(A,Cons(B,Cons(C,Cons(D,      Nil))))
+

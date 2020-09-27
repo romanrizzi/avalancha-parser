@@ -1,0 +1,13 @@
+
+-- Funciones (pre y postcondición)
+
+fun foo1?false
+
+fun foo2!a
+
+fun foo3?a==b!c
+
+fun foo4 : x, y -> z
+  ? not (x == y)
+  ! f(x) and f(y) imp not f(z)
+
