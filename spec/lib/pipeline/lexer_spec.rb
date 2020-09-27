@@ -16,6 +16,21 @@ describe Pipeline::Lexer do
     assert_tokens_correctly_generated("-- a comment \n", [:EOS])
   end
 
+  context 'keywords' do
+    it { assert_tokens_correctly_generated('check', %i[CHECK EOS]) }
+    it { assert_tokens_correctly_generated('true', %i[TRUE EOS]) }
+    it { assert_tokens_correctly_generated('false', %i[FALSE EOS]) }
+  end
+
+  context 'reserved symbols' do
+    it { assert_tokens_correctly_generated('==', %i[EQ EOS]) }
+    it { assert_tokens_correctly_generated('==', %i[EQ EOS]) }
+  end
+
+  context 'identifiers' do
+    it { assert_tokens_correctly_generated('asd', %i[LOWERID EOS]) }
+  end
+
   def assert_tokens_correctly_generated(string, expected_types)
     tokens = subject.lex(string)
 
