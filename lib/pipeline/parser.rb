@@ -7,7 +7,7 @@ module Pipeline
     production(:program) do
       clause('') { ['program', [], []] }
       clause('program definition check') do |program, _deff, check|
-        ['program', program[1], program[2].concat(check)]
+        ['program', program[1], program[2] << check]
       end
     end
 
@@ -16,17 +16,32 @@ module Pipeline
     end
 
     production(:check) do
-      clause('CHECK atom') { |_, a| [['check', a]] }
+      clause('CHECK atomic_formula') { |_, a| ['check', a] }
     end
 
-    production(:atom) do
+    production(:atomic_formula) do
       clause('TRUE') { |_| ['true'] }
       clause('FALSE') { |_| ['false'] }
+      clause('LPAREN atomic_formula RPAREN') { |_, f, _| f }
+      clause('expression') { |e1| ['equal', e1, ['true']] }
       clause('expression EQ expression') { |e1, _, e2| ['equal', e1, e2] }
     end
 
     production(:expression) do
       clause('LOWERID') { |id| ['var', id] }
+      clause('LOWERID LPAREN expression_list RPAREN') { |id, _, el, _| [['var', id], el] }
+      clause('UPPERID') { |id| ['cons', id, []] }
+      clause('UPPERID LPAREN expression_list RPAREN') { |id, _, el, _| ['cons', id, el] }
+    end
+
+    production(:expression_list) do
+      clause('') { [] }
+      clause('non_empty_expression_list') { |el| el }
+    end
+
+    production(:non_empty_expression_list) do
+      clause('expression') { |e| [e] }
+      clause('expression COMMA non_empty_expression_list') { |e, _, el| [e] + el }
     end
 
     finalize

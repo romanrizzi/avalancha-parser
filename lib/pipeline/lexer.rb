@@ -14,5 +14,10 @@ module Pipeline
     rule(/==/) { :EQ }
 
     rule(/[a-z][_a-zA-Z0-9]*/) { |id| [:LOWERID, id] }
+    rule(/[A-Z][_a-zA-Z0-9]*/) { |id| [:UPPERID, id] }
+
+    rule(/\(/) { :LPAREN }
+    rule(/\)/) { :RPAREN }
+    rule(/,/) { :COMMA }
   end
 end

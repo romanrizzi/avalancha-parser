@@ -29,6 +29,10 @@ describe Pipeline::Lexer do
 
   context 'identifiers' do
     it { assert_tokens_correctly_generated('asd', %i[LOWERID EOS]) }
+    it { assert_tokens_correctly_generated('Zero', %i[UPPERID EOS]) }
+    it { assert_tokens_correctly_generated('Zero()', %i[UPPERID LPAREN RPAREN EOS]) }
+    it { assert_tokens_correctly_generated('Suc(Zero)', %i[UPPERID LPAREN UPPERID RPAREN EOS]) }
+    it { assert_tokens_correctly_generated('A(b,C)', %i[UPPERID LPAREN LOWERID COMMA UPPERID RPAREN EOS]) }
   end
 
   def assert_tokens_correctly_generated(string, expected_types)

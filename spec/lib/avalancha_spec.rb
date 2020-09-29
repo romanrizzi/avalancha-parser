@@ -7,8 +7,17 @@ require_relative '../../lib/avalancha'
 describe Avalancha do
   let(:instance) { Avalancha.build }
 
-  it { assert_works_with_test_file('test00') }
-  it { assert_works_with_test_file('test01') }
+  it 'works with test00' do
+    assert_works_with_test_file('test00')
+  end
+
+  it 'works with test01' do
+    assert_works_with_test_file('test01')
+  end
+
+  it 'works with test02' do
+    assert_works_with_test_file('test02')
+  end
 
   def assert_works_with_test_file(test_name)
     expected = JSON.parse(File.read(build_path(test_name, 'expected')))
