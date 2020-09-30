@@ -23,7 +23,7 @@ module Pipeline
       clause('TRUE') { |_| ['true'] }
       clause('FALSE') { |_| ['false'] }
       clause('LPAREN atomic_formula RPAREN') { |_, f, _| f }
-      clause('expression') { |e1| ['equal', e1, ['true']] }
+      clause('expression') { |e1| ['equal', e1, ['cons', 'True', []]] }
       clause('expression EQ expression') { |e1, _, e2| ['equal', e1, e2] }
     end
 
