@@ -14,6 +14,7 @@ module Pipeline
     rule(/not/) { :NOT }
     rule(/and/) { :AND }
     rule(/or/) { :OR }
+    rule(/imp/) { :IMP }
     rule(/==/) { :EQ }
 
     rule(/[a-z][_a-zA-Z0-9]*/) { |id| [:LOWERID, id] }

@@ -16,7 +16,12 @@ module Pipeline
     end
 
     production(:check) do
-      clause('CHECK neg_and_or_formula') { |_, a| ['check', a] }
+      clause('CHECK neg_and_or_imp_formula') { |_, a| ['check', a] }
+    end
+
+    production(:neg_and_or_imp_formula) do
+      clause('neg_and_or_formula') { |f| f }
+      clause('neg_and_or_formula IMP neg_and_or_imp_formula') { |f1, _, f2| ['imp', f1, f2] }
     end
 
     production(:neg_and_or_formula) do
@@ -37,7 +42,7 @@ module Pipeline
     production(:atomic_formula) do
       clause('TRUE') { |_| ['true'] }
       clause('FALSE') { |_| ['false'] }
-      clause('LPAREN neg_and_or_formula RPAREN') { |_, f, _| f }
+      clause('LPAREN neg_and_or_imp_formula RPAREN') { |_, f, _| f }
       clause('expression') { |e1| ['equal', e1, ['cons', 'True', []]] }
       clause('expression EQ expression') { |e1, _, e2| ['equal', e1, e2] }
     end

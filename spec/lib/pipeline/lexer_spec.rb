@@ -40,6 +40,7 @@ describe Pipeline::Lexer do
 
   it { assert_tokens_correctly_generated('check A and B ', %i[CHECK UPPERID AND UPPERID EOS]) }
   it { assert_tokens_correctly_generated('check A or B ', %i[CHECK UPPERID OR UPPERID EOS]) }
+  it { assert_tokens_correctly_generated('check A imp B ', %i[CHECK UPPERID IMP UPPERID EOS]) }
 
   def assert_tokens_correctly_generated(string, expected_types)
     tokens = subject.lex(string)
