@@ -16,13 +16,18 @@ module Pipeline
     end
 
     production(:check) do
-      clause('CHECK atomic_formula') { |_, a| ['check', a] }
+      clause('CHECK neg_formula') { |_, a| ['check', a] }
+    end
+
+    production(:neg_formula) do
+      clause('atomic_formula') { |f| f }
+      clause('NOT neg_formula') { |_, f| ['not', f] }
     end
 
     production(:atomic_formula) do
       clause('TRUE') { |_| ['true'] }
       clause('FALSE') { |_| ['false'] }
-      clause('LPAREN atomic_formula RPAREN') { |_, f, _| f }
+      clause('LPAREN neg_formula RPAREN') { |_, f, _| f }
       clause('expression') { |e1| ['equal', e1, ['cons', 'True', []]] }
       clause('expression EQ expression') { |e1, _, e2| ['equal', e1, e2] }
     end

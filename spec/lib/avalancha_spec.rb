@@ -31,6 +31,14 @@ describe Avalancha do
     assert_works_with_test_file('test05')
   end
 
+  it 'passes test06' do
+    assert_works_with_test_file('test06')
+  end
+
+  it 'passes test07' do
+    assert_works_with_test_file('test07')
+  end
+
   def assert_works_with_test_file(test_name)
     expected = JSON.parse(File.read(build_path(test_name, 'expected')))
 

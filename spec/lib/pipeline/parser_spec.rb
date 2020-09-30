@@ -60,10 +60,18 @@ describe Pipeline::Parser do
     expect(subject.parse(tokens)).to contain_exactly(*expected)
   end
 
-  it 'parses a check' do
+  it 'parses a function application' do
     string = 'check f()'
     tokens = Pipeline::Lexer.new.lex(string)
     expected = build_expected(checks: [['check', ['equal', ['app', 'f', []], ['cons', 'True', []]]]])
+
+    expect(subject.parse(tokens)).to contain_exactly(*expected)
+  end
+
+  it 'parses a not' do
+    string = 'check not f()'
+    tokens = Pipeline::Lexer.new.lex(string)
+    expected = build_expected(checks: [['check', ['not', ['equal', ['app', 'f', []], ['cons', 'True', []]]]]])
 
     expect(subject.parse(tokens)).to contain_exactly(*expected)
   end

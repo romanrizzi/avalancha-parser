@@ -36,6 +36,7 @@ describe Pipeline::Lexer do
   end
 
   it { assert_tokens_correctly_generated('f()', %i[LOWERID LPAREN RPAREN EOS]) }
+  it { assert_tokens_correctly_generated('check not foo', %i[CHECK NOT LOWERID EOS]) }
 
   def assert_tokens_correctly_generated(string, expected_types)
     tokens = subject.lex(string)
