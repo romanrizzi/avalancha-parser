@@ -29,8 +29,9 @@ module Pipeline
 
     production(:expression) do
       clause('LOWERID') { |id| ['var', id] }
-      clause('LOWERID LPAREN expression_list RPAREN') { |id, _, el, _| [['var', id], el] }
       clause('UPPERID') { |id| ['cons', id, []] }
+
+      clause('LOWERID LPAREN expression_list RPAREN') { |id, _, el, _| ['app', id, el] }
       clause('UPPERID LPAREN expression_list RPAREN') { |id, _, el, _| ['cons', id, el] }
     end
 

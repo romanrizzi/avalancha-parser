@@ -35,6 +35,8 @@ describe Pipeline::Lexer do
     it { assert_tokens_correctly_generated('A(b,C)', %i[UPPERID LPAREN LOWERID COMMA UPPERID RPAREN EOS]) }
   end
 
+  it { assert_tokens_correctly_generated('f()', %i[LOWERID LPAREN RPAREN EOS]) }
+
   def assert_tokens_correctly_generated(string, expected_types)
     tokens = subject.lex(string)
 
