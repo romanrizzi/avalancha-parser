@@ -17,19 +17,24 @@ module Pipeline
     end
 
     production(:definition) do
-      clause('FUN LOWERID signature') do |_, fname, s|
-        [
-          'fun', fname, s,
-          ['pre', ['true']],
-          ['post', ['true']],
-          []
-        ]
+      clause('FUN LOWERID signature precondition postcondition') do |_, fname, s, pre, post|
+        ['fun', fname, s, pre, post, []]
       end
     end
 
     production(:signature) do
       clause('') { ['sig', [], '_'] }
       clause('COLON param_list ARROW param') { |_, pl, _, param| ['sig', pl, param] }
+    end
+
+    production(:precondition) do
+      clause('') { ['pre', ['true']] }
+      clause('QUESTION neg_and_or_imp_formula') { |_, f| ['pre', f] }
+    end
+
+    production(:postcondition) do
+      clause('') { ['post', ['true']] }
+      clause('BANG neg_and_or_imp_formula') { |_, f| ['post', f] }
     end
 
     production(:param_list) do

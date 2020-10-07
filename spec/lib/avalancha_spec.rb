@@ -11,7 +11,7 @@ describe Avalancha do
     test00 test01 test02 test03
     test04 test05 test06 test07
     test08 test09 test10 test11
-    test12
+    test12 test13
   ].each do |test_name|
     it "passes #{test_name}" do
       assert_works_with_test_file(test_name)

@@ -11,6 +11,8 @@ module Pipeline
     rule(/:/) { :COLON }
     rule(/_/) { :UNDERSCORE }
     rule(/->/) { :ARROW }
+    rule(/\?/) { :QUESTION }
+    rule(/!/) { :BANG }
 
     rule(/check/) { :CHECK }
     rule(/true/) { :TRUE }
