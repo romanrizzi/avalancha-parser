@@ -7,48 +7,15 @@ require_relative '../../lib/avalancha'
 describe Avalancha do
   let(:instance) { Avalancha.build }
 
-  it 'passes test00' do
-    assert_works_with_test_file('test00')
-  end
-
-  it 'passes test01' do
-    assert_works_with_test_file('test01')
-  end
-
-  it 'passes test02' do
-    assert_works_with_test_file('test02')
-  end
-
-  it 'passes test03' do
-    assert_works_with_test_file('test03')
-  end
-
-  it 'passes test04' do
-    assert_works_with_test_file('test04')
-  end
-
-  it 'passes test05' do
-    assert_works_with_test_file('test05')
-  end
-
-  it 'passes test06' do
-    assert_works_with_test_file('test06')
-  end
-
-  it 'passes test07' do
-    assert_works_with_test_file('test07')
-  end
-
-  it 'passes test08' do
-    assert_works_with_test_file('test08')
-  end
-
-  it 'passes test09' do
-    assert_works_with_test_file('test09')
-  end
-
-  it 'passes test10' do
-    assert_works_with_test_file('test10')
+  %w[
+    test00 test01 test02 test03
+    test04 test05 test06 test07
+    test08 test09 test10 test11
+    test12
+  ].each do |test_name|
+    it "passes #{test_name}" do
+      assert_works_with_test_file(test_name)
+    end
   end
 
   def assert_works_with_test_file(test_name)

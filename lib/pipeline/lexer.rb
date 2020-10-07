@@ -7,6 +7,11 @@ module Pipeline
     rule(/--.*\n/)
     rule(/\s/)
 
+    rule(/fun/) { :FUN }
+    rule(/:/) { :COLON }
+    rule(/_/) { :UNDERSCORE }
+    rule(/->/) { :ARROW }
+
     rule(/check/) { :CHECK }
     rule(/true/) { :TRUE }
     rule(/false/) { :FALSE }

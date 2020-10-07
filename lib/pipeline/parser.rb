@@ -6,13 +6,50 @@ module Pipeline
   class Parser < RLTK::Parser
     production(:program) do
       clause('') { ['program', [], []] }
-      clause('program definition check') do |program, _deff, check|
-        ['program', program[1], program[2] << check]
+      clause('definitions checks') do |defs, checks|
+        ['program', defs, checks]
       end
     end
 
-    production(:definition) do
+    production(:definitions) do
       clause('') { [] }
+      clause('definition definitions') { |d, ds| [d] + ds }
+    end
+
+    production(:definition) do
+      clause('FUN LOWERID signature') do |_, fname, s|
+        [
+          'fun', fname, s,
+          ['pre', ['true']],
+          ['post', ['true']],
+          []
+        ]
+      end
+    end
+
+    production(:signature) do
+      clause('') { ['sig', [], '_'] }
+      clause('COLON param_list ARROW param') { |_, pl, _, param| ['sig', pl, param] }
+    end
+
+    production(:param_list) do
+      clause('') { [] }
+      clause('non_empty_param_list') { |l| l }
+    end
+
+    production(:non_empty_param_list) do
+      clause('param') { |param| [param] }
+      clause('param COMMA non_empty_param_list') { |paraml, _, non_empty_list| [paraml] + non_empty_list }
+    end
+
+    production(:param) do
+      clause('LOWERID') { |id| id }
+      clause('UNDERSCORE') { |_| '_' }
+    end
+
+    production(:checks) do
+      clause('') { [] }
+      clause('check checks') { |c, cs| [c] + cs }
     end
 
     production(:check) do

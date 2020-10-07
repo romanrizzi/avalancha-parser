@@ -93,6 +93,17 @@ describe Pipeline::Parser do
     expect(subject.parse(tokens)).to contain_exactly(*expected)
   end
 
+  it 'parses a function with its signature' do
+    string = 'fun foo2 : -> _'
+    tokens = Pipeline::Lexer.new.lex(string)
+    expected = build_expected(defs:
+      [
+        ['fun', 'foo2', ['sig', [], '_'], ['pre', ['true']], ['post', ['true']], []]
+      ])
+
+    expect(subject.parse(tokens)).to contain_exactly(*expected)
+  end
+
   def build_expected(defs: [], checks: [])
     ['program', defs, checks]
   end

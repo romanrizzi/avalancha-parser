@@ -42,6 +42,12 @@ describe Pipeline::Lexer do
   it { assert_tokens_correctly_generated('check A or B ', %i[CHECK UPPERID OR UPPERID EOS]) }
   it { assert_tokens_correctly_generated('check A imp B ', %i[CHECK UPPERID IMP UPPERID EOS]) }
 
+  context 'function definitions' do
+    it { assert_tokens_correctly_generated('fun foo2 : -> _', %i[FUN LOWERID COLON ARROW UNDERSCORE EOS]) }
+    it { assert_tokens_correctly_generated('fun foo4 : _ -> _', %i[FUN LOWERID COLON UNDERSCORE ARROW UNDERSCORE EOS]) }
+    it { assert_tokens_correctly_generated('fun foo10:_,y->_', %i[FUN LOWERID COLON UNDERSCORE COMMA LOWERID ARROW UNDERSCORE EOS]) }
+  end
+
   def assert_tokens_correctly_generated(string, expected_types)
     tokens = subject.lex(string)
 
