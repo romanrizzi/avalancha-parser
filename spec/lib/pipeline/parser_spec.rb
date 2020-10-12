@@ -104,7 +104,7 @@ describe Pipeline::Parser do
     expect(subject.parse(tokens)).to contain_exactly(*expected)
   end
 
-  it 'xxxx' do
+  it 'creates a signature using the function arity' do
     string = <<~EOS
       fun neg
         True  -> False
