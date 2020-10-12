@@ -4,3 +4,9 @@ Style/Documentation:
   Enabled: false
 Metrics/BlockLength:
   Enabled: false
+Metrics/ParameterLists:
+  Enabled: false
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false

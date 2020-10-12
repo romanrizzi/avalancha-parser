@@ -104,6 +104,28 @@ describe Pipeline::Parser do
     expect(subject.parse(tokens)).to contain_exactly(*expected)
   end
 
+  it 'xxxx' do
+    string = <<~EOS
+      fun neg
+        True  -> False
+        False -> True
+    EOS
+    tokens = Pipeline::Lexer.new.lex(string)
+    expected = build_expected(defs:
+      [
+        ['fun', 'neg',
+         ['sig', ['_'], '_'],
+         ['pre', ['true']],
+         ['post', ['true']],
+         [
+           ['rule', [['pcons', 'True', []]], ['cons', 'False', []]],
+           ['rule', [['pcons', 'False', []]], ['cons', 'True', []]]
+         ]]
+      ])
+
+    expect(subject.parse(tokens)).to contain_exactly(*expected)
+  end
+
   def build_expected(defs: [], checks: [])
     ['program', defs, checks]
   end

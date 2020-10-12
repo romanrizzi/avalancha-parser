@@ -1,9 +1,21 @@
 # frozen_string_literal: true
 
 require 'rltk/parser'
+require 'byebug'
 
 module Pipeline
   class Parser < RLTK::Parser
+    class Environment < Environment
+      def populate_signature(sig, rules)
+        return sig unless sig[1].empty? && !rules.empty?
+
+        arity = rules[0][1].size
+        new_args = ['_'] * arity
+
+        ['sig', new_args, sig[2]]
+      end
+    end
+
     production(:program) do
       clause('') { ['program', [], []] }
       clause('definitions checks') do |defs, checks|
@@ -17,8 +29,8 @@ module Pipeline
     end
 
     production(:definition) do
-      clause('FUN LOWERID signature precondition postcondition') do |_, fname, s, pre, post|
-        ['fun', fname, s, pre, post, []]
+      clause('FUN LOWERID signature precondition postcondition rules') do |_, fname, s, pre, post, r|
+        ['fun', fname, populate_signature(s, r), pre, post, r]
       end
     end
 
@@ -35,6 +47,32 @@ module Pipeline
     production(:postcondition) do
       clause('') { ['post', ['true']] }
       clause('BANG neg_and_or_imp_formula') { |_, f| ['post', f] }
+    end
+
+    production(:rules) do
+      clause('') { [] }
+      clause('rule rules') { |r, rs| [r] + rs }
+    end
+
+    production(:rule) do
+      clause('pattern_list ARROW expression') { |pl, _, e| ['rule', pl, e] }
+    end
+
+    production(:pattern_list) do
+      clause('') { [] }
+      clause('non_empty_pattern_list') { |nepl| nepl }
+    end
+
+    production(:non_empty_pattern_list) do
+      clause('pattern') { |pat| [pat] }
+      clause('pattern COMMA non_empty_pattern_list') { |pat, _, pl| [pat] + pl }
+    end
+
+    production(:pattern) do
+      clause('UNDERSCORE') { |_| ['pwild'] }
+      clause('LOWERID') { |id| ['pvar', id] }
+      clause('UPPERID') { |id| ['pcons', id, []] }
+      clause('UPPERID LPAREN pattern_list RPAREN') { |id, _, pl, _| ['pcons', id, pl] }
     end
 
     production(:param_list) do
