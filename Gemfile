@@ -13,3 +13,4 @@ end
 
 gem 'json'
 gem 'rltk'
+gem 'rake'

@@ -13,8 +13,12 @@ class Avalancha
     @parser = parser
   end
 
+  def lex(input_path)
+    lexer.lex_file(input_path)
+  end
+
   def parse(input_path)
-    tokens = lexer.lex_file(input_path)
+    tokens = lex(input_path)
 
     parser.parse(tokens)
   end
