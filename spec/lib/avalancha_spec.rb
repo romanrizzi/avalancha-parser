@@ -7,26 +7,51 @@ require_relative '../../lib/avalancha'
 describe Avalancha do
   let(:instance) { Avalancha.build }
 
-  %w[
-    test00 test01 test02 test03
-    test04 test05 test06 test07
-    test08 test09 test10 test11
-    test12 test13 test14
-  ].each do |test_name|
-    it "passes #{test_name}" do
-      assert_works_with_test_file(test_name)
+  describe 'Parser' do
+    let(:folder) { 'parser' }
+
+    %w[
+      test00 test01 test02 test03
+      test04 test05 test06 test07
+      test08 test09 test10 test11
+      test12 test13 test14
+    ].each do |test_name|
+      it "passes #{test_name}" do
+        assert_parses_test_file(folder, test_name)
+      end
+    end
+
+    def assert_parses_test_file(folder, test_name)
+      expected = JSON.parse(File.read(build_path(folder, test_name, 'expected')))
+
+      result = instance.parse(build_path(folder, test_name, 'input'))
+
+      expect(result).to eq(expected)
     end
   end
 
-  def assert_works_with_test_file(test_name)
-    expected = JSON.parse(File.read(build_path(test_name, 'expected')))
+  describe 'Code generation' do
+    let(:folder) { 'codegen' }
 
-    result = instance.parse(build_path(test_name, 'input'))
+    %w[
+      01
+    ].each do |test_name|
+      it "passes #{test_name}" do
+        assert_compiles_test_file(folder, test_name)
+      end
+    end
 
-    expect(result).to eq(expected)
+    def assert_compiles_test_file(folder, test_name)
+      result = instance.compile(build_path(folder, test_name, 'input')).split("\n")
+
+      expected_path = build_path(folder, test_name, 'expected')
+      expected = File.read(expected_path).split("\n")
+
+      expect(result).to contain_exactly(*expected)
+    end
   end
 
-  def build_path(test_name, ext)
-    "examples/#{test_name}.#{ext}"
+  def build_path(folder, test_name, ext)
+    "examples/#{folder}/#{test_name}.#{ext}"
   end
 end

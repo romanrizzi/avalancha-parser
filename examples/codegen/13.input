@@ -1,0 +1,60 @@
+
+fun menor_o_igual
+  Zero   , _      -> True
+  _      , Zero   -> False
+  Suc(x) , Suc(y) -> menor_o_igual(x, y)
+
+fun and_
+  True  , x -> x
+  False , _ -> False
+
+fun ordenada
+  Nil                  -> True
+  Cons(_, Nil)         -> True
+  Cons(x, Cons(y, xs)) -> and_(
+                            menor_o_igual(x, y),
+                            ordenada(Cons(y, xs))
+                          )
+
+fun insertar
+  : x , xs -> ys
+  ? ordenada(xs)
+  ! ordenada(ys)
+
+  x , Nil         -> Cons(x, Nil)
+  x , Cons(y, ys) -> insertar_if(menor_o_igual(x, y), x, y, ys)
+                       
+fun insertar_if
+  True  , x , y , ys -> Cons(x, Cons(y, ys))
+  False , x , y , ys -> Cons(y, insertar(x, ys))
+
+fun ordenar
+  : _ -> res
+  ! ordenada(res)
+  Nil         -> Nil
+  Cons(x, xs) -> insertar(x, ordenar(xs))
+
+fun range
+  Zero   -> Cons(Zero, Nil)
+  Suc(x) -> Cons(Suc(x), range(x))
+
+print menor_o_igual(Suc(Suc(Suc(Zero))),
+                    Suc(Suc(Suc(Zero))))
+
+print ordenada(
+        Cons(Zero,
+          Cons(Suc(Zero),
+            Cons(Suc(Suc(Suc(Zero))),
+              Cons(Suc(Suc(Suc(Zero))),
+                Nil)))))
+
+print ordenada(
+        Cons(Zero,
+          Cons(Suc(Suc(Suc(Zero))),
+            Cons(Suc(Zero),
+              Cons(Suc(Suc(Suc(Zero))),
+                Nil)))))
+
+print range(Suc(Suc(Suc(Suc(Suc(Suc(Suc(Zero))))))))
+print ordenar(range(Suc(Suc(Suc(Suc(Suc(Suc(Suc(Zero)))))))))
+

@@ -1,0 +1,5 @@
+A
+B
+True
+False
+Cons(Zero, Cons(Suc(Zero), Cons(Suc(Suc(Zero)), Nil)))

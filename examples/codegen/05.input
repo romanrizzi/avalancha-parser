@@ -1,0 +1,12 @@
+
+fun sucsuc
+  x -> Suc(Suc(x))
+
+fun if
+  True,  x, _ -> x
+  False, _, y -> y
+
+print sucsuc(sucsuc(Zero))
+print if(True, A, B)
+print if(False, A, B)
+

@@ -8,7 +8,7 @@ task :lex_file, [:path] do |_, args|
 
   tokens = Avalancha.build.lex(args[:path])
 
-  puts tokens.map { |token| token.type }.to_s.gsub("\n", '')
+  puts tokens.map(&:type).to_s.gsub("\n", '')
 
   puts "\n"
 end
@@ -16,8 +16,8 @@ end
 task :parse_file, [:path] do |_, args|
   puts "-----  Parsing #{args[:path]} -----"
   puts "\n"
-  
+
   pp Avalancha.build.parse(args[:path])
-  
+
   puts "\n"
 end

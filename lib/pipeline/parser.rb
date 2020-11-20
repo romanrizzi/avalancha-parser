@@ -96,6 +96,7 @@ module Pipeline
     end
 
     production(:check) do
+      clause('PRINT expression') { |_, e| ['print', e] }
       clause('CHECK neg_and_or_imp_formula') { |_, a| ['check', a] }
     end
 

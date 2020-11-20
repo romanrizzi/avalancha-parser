@@ -1,0 +1,5 @@
+True
+True
+False
+Cons(Suc(Suc(Suc(Suc(Suc(Suc(Suc(Zero))))))), Cons(Suc(Suc(Suc(Suc(Suc(Suc(Zero)))))), Cons(Suc(Suc(Suc(Suc(Suc(Zero))))), Cons(Suc(Suc(Suc(Suc(Zero)))), Cons(Suc(Suc(Suc(Zero))), Cons(Suc(Suc(Zero)), Cons(Suc(Zero), Cons(Zero, Nil))))))))
+Cons(Zero, Cons(Suc(Zero), Cons(Suc(Suc(Zero)), Cons(Suc(Suc(Suc(Zero))), Cons(Suc(Suc(Suc(Suc(Zero)))), Cons(Suc(Suc(Suc(Suc(Suc(Zero))))), Cons(Suc(Suc(Suc(Suc(Suc(Suc(Zero)))))), Cons(Suc(Suc(Suc(Suc(Suc(Suc(Suc(Zero))))))), Nil))))))))

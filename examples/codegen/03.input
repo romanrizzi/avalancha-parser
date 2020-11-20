@@ -1,0 +1,8 @@
+
+fun neg
+  True  -> False
+  False -> True
+
+print neg(True)
+print neg(False)
+

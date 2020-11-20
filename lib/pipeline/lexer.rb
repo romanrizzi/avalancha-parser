@@ -15,6 +15,7 @@ module Pipeline
     rule(/!/) { :BANG }
 
     rule(/check/) { :CHECK }
+    rule(/print/) { :PRINT }
     rule(/true/) { :TRUE }
     rule(/false/) { :FALSE }
 

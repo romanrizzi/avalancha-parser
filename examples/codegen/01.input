@@ -1,0 +1,7 @@
+
+print A
+print B
+print True
+print False
+print Cons(Zero, Cons(Suc(Zero), Cons(Suc(Suc(Zero)), Nil)))
+

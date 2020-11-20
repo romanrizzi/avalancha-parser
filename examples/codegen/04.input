@@ -1,0 +1,36 @@
+
+fun and_
+  True  , True  -> True
+  True  , False -> False
+  False , True  -> False
+  False , False -> False
+
+fun or_
+  True  , True  -> True
+  True  , False -> True
+  False , True  -> True
+  False , False -> False
+
+fun siguiente
+  Norte -> Este
+  Este  -> Sur
+  Sur   -> Oeste
+  Oeste -> Norte
+
+print and_(True, True)
+print and_(True, False)
+print and_(False, True)
+print and_(False, False)
+
+print or_(True, True)
+print or_(True, False)
+print or_(False, True)
+print or_(False, False)
+
+print Q(
+        siguiente(Norte),
+        siguiente(siguiente(Norte)),
+        siguiente(siguiente(siguiente(Norte))),
+        siguiente(siguiente(siguiente(siguiente(Norte))))
+      )
+

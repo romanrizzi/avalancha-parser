@@ -12,5 +12,5 @@ group :development do
 end
 
 gem 'json'
-gem 'rltk'
 gem 'rake'
+gem 'rltk'

@@ -1,0 +1,9 @@
+
+fun uno
+  -> Suc(Zero)
+
+fun tres
+  -> Suc(Suc(uno()))
+
+print tres()
+

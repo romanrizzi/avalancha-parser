@@ -1,0 +1,14 @@
+
+fun sum
+  Zero   , y -> y
+  Suc(x) , y -> Suc(sum(x, y))
+
+fun mul
+  Zero   , _ -> Zero
+  Suc(x) , y -> sum(y, mul(x, y))
+
+print mul(
+  Suc(Suc(Suc(Zero))),
+  Suc(Suc(Suc(Suc(Zero))))
+)
+

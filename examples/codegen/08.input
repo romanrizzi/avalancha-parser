@@ -1,0 +1,8 @@
+
+fun foo
+  ? True
+  ! True
+  -> A
+
+print foo()
+
