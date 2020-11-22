@@ -42,8 +42,8 @@ describe Compilation::Expressions do
 
     expression = ['cons', 'Suc', [['app', 'uno', []]]]
 
-    expected = build_app(0, 'f_0')
-    expected += build_expression(2, 1, [0])
+    expected = build_app(0, 'f_0') # Application uses 2 vars.
+    expected += build_expression(2, 2, [0])
 
     compiled_expression = subject.compile(expression, fcontext)
 

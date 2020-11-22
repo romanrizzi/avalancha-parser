@@ -45,8 +45,8 @@ module Pipeline
     def build_fresh_context(tags)
       {
         functions: {},
-        last_fun_id_used: 0,
-        last_var_id_used: 0,
+        next_fun_id: 0,
+        next_var_id: 0,
         tags: tags
       }
     end
@@ -75,11 +75,11 @@ module Pipeline
       case definition.first
       when 'fun'
         # We can reuse var ids since we are inside a function.
-        local_context = @context.merge(last_var_id_used: 0)
+        local_context = @context.merge(next_var_id: 0)
 
         compiled = @fbuilder.compile(definition, local_context)
 
-        @context = compiled[:context].merge(last_var_id_used: @context[:last_var_id_used])
+        @context = compiled[:context].merge(next_var_id: @context[:next_var_id])
 
         program.add_prototype(compiled[:signature])
         program.add_function(compiled[:code])

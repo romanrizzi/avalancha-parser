@@ -34,7 +34,7 @@ describe Avalancha do
     let(:folder) { 'codegen' }
 
     %w[
-      01 02
+      01 02 03
     ].each do |test_name|
       it "passes #{test_name}" do
         assert_compiles_test_file(folder, test_name)
