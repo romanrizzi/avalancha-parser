@@ -3,44 +3,36 @@
 module Compilation
   class Program
     def initialize(tags)
-      @code = ''
       @checks = ''
       @tags = tags
-      @main_vars = 0
+      @prototypes = []
+      @functions = []
+    end
+
+    def add_prototype(prototype)
+      @prototypes << prototype
+    end
+
+    def add_function(function)
+      @functions << function
+    end
+
+    def add_check(code)
+      @checks += code
+    end
+
+    def to_s
+      @code = ''
 
       apply_headers
       add_base_defs
       define_utility_functions
-    end
 
-    def to_s
-      @code
-    end
+      @prototypes.each { |p| @code += [p, "\n"].join }
+      @functions.each { |p| @code += [p, "\n"].join }
 
-    def add_expression(tag:, var:, children:)
-      children_refs = children.reduce('') do |memo, r|
-        memo + "#{spaces} e_#{var}->children.push_back(e_#{r});\n"
-      end
-
-      @checks += <<~HEREDOC
-        Term* e_#{var} = new Term();
-        #{spaces} e_#{var}->tag = #{@tags[tag]};
-        #{spaces} e_#{var}->refcnt = 0;
-        #{children_refs}
-      HEREDOC
-    end
-
-    def add_print(var_number)
-      @checks += <<~HEREDOC
-        #{spaces} incref(e_#{var_number});
-        #{spaces} printTerm(e_#{var_number}, tags);
-        cout << "\\n";
-        #{spaces} decref(e_#{var_number});
-      HEREDOC
-    end
-
-    def build_main_method
       @code += <<~HEREDOC
+
         int main() {
             #{add_tags}
             #{@checks}

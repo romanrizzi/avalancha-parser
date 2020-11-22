@@ -3,7 +3,6 @@
 require_relative 'pipeline/lexer'
 require_relative 'pipeline/parser'
 require_relative 'pipeline/compiler'
-require 'byebug'
 
 class Avalancha
   def self.build
@@ -31,6 +30,12 @@ class Avalancha
   end
 
   def compile(input_path)
+    tags = get_tags_from(input_path)
+
+    compiler.compile(tags, parse(input_path))
+  end
+
+  def compile_and_run(input_path)
     tags = get_tags_from(input_path)
 
     compiler.compile_and_run(tags, parse(input_path))

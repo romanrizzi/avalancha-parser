@@ -21,3 +21,13 @@ task :parse_file, [:path] do |_, args|
 
   puts "\n"
 end
+
+task :print_compiled, [:path] do |_, args|
+  puts "-----  Compiling #{args[:path]} -----"
+  puts "\n"
+
+  program = Avalancha.build.compile(args[:path])
+  puts program.to_s
+
+  puts "\n"
+end

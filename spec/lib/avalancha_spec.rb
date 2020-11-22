@@ -34,7 +34,7 @@ describe Avalancha do
     let(:folder) { 'codegen' }
 
     %w[
-      01
+      01 02
     ].each do |test_name|
       it "passes #{test_name}" do
         assert_compiles_test_file(folder, test_name)
@@ -42,7 +42,7 @@ describe Avalancha do
     end
 
     def assert_compiles_test_file(folder, test_name)
-      result = instance.compile(build_path(folder, test_name, 'input')).split("\n")
+      result = instance.compile_and_run(build_path(folder, test_name, 'input')).split("\n")
 
       expected_path = build_path(folder, test_name, 'expected')
       expected = File.read(expected_path).split("\n")

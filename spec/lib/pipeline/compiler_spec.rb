@@ -6,7 +6,7 @@ require_relative '../../../lib/pipeline/lexer'
 require_relative '../../../lib/pipeline/parser'
 
 describe Pipeline::Compiler do
-  it 'a' do
+  it 'compiles a simple cons' do
     tags = { 'A' => 0 }
     program = build_parsed_program(checks: [['print', ['cons', 'A', []]]])
 
@@ -15,7 +15,7 @@ describe Pipeline::Compiler do
     expect(results).to eq(['A'])
   end
 
-  it 'b' do
+  it 'compiles nested cons' do
     tags = { 'Cons' => 0, 'Zero' => 1, 'Suc' => 2, 'Nil' => 3 }
 
     tokens = Pipeline::Lexer.new.lex('print Cons(Zero, Cons(Suc(Zero), Cons(Suc(Suc(Zero)), Nil)))')

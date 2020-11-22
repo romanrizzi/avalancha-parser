@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rltk/parser'
-require 'byebug'
 
 module Pipeline
   class Parser < RLTK::Parser
