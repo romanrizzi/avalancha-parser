@@ -43,11 +43,41 @@ describe Compilation::Expressions do
     expression = ['cons', 'Suc', [['app', 'uno', []]]]
 
     expected = build_app(0, 'f_0') # Application uses 2 vars.
-    expected += build_expression(2, 2, [0])
+    expected += build_expression(2, 1, [0])
 
     compiled_expression = subject.compile(expression, fcontext)
 
     expect(compiled_expression[:code]).to eq(expected)
+  end
+
+  it 'compiles a recursive call' do
+    app =
+      [
+        'app', 'siguiente', [
+          ['app', 'siguiente', [
+            ['app', 'siguiente', [
+              ['app', 'siguiente', [
+                ['cons', 'Zero', []]
+              ]]
+            ]]
+          ]]
+        ]
+      ]
+
+    fcontext = context
+    fcontext[:functions] = { 'siguiente' => 'f_0' }
+
+    result = <<~HEREDOC
+      \x20\x20\x20\x20Term* e_0 = new Term();
+      \x20\x20\x20\x20e_0->tag = 1;
+      \x20\x20\x20\x20e_0->refcnt = 0;
+      \x20\x20\x20\x20Term* e_1 = f_0(e_0);
+      \x20\x20\x20\x20Term* e_2 = f_0(e_1);
+      \x20\x20\x20\x20Term* e_3 = f_0(e_2);
+      \x20\x20\x20\x20Term* e_4 = f_0(e_3);
+    HEREDOC
+
+    expect(subject.compile(app, fcontext)[:code]).to eq(result)
   end
 
   def context
@@ -56,19 +86,19 @@ describe Compilation::Expressions do
   end
 
   def build_app(var, f_name)
-    "Term* e_#{var} = #{f_name}();\n"
+    "\x20\x20\x20\x20Term* e_#{var} = #{f_name}();\n"
   end
 
   def build_expression(tag, var, children)
     expression = <<~HEREDOC
-      \x20\x20\x20 Term* e_#{var} = new Term();
-      \x20\x20\x20 e_#{var}->tag = #{tag};
-      \x20\x20\x20 e_#{var}->refcnt = 0;
+      \x20\x20\x20\x20Term* e_#{var} = new Term();
+      \x20\x20\x20\x20e_#{var}->tag = #{tag};
+      \x20\x20\x20\x20e_#{var}->refcnt = 0;
     HEREDOC
 
     children.each do |c|
       expression += <<~HEREDOC
-        \x20\x20\x20 e_#{var}->children.push_back(e_#{c});
+        \x20\x20\x20\x20e_#{var}->children.push_back(e_#{c});
       HEREDOC
     end
 

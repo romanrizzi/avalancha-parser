@@ -17,33 +17,6 @@ module Compilation
       { signature: [signature, ';'].join, code: function[:code], context: new_context }
     end
 
-    def compile_app(app, context)
-      original_name = app[1]
-
-      compiled_args = app[2].each_with_object({ code: '', vars: [], context: context }) do |a, m|
-        compiled = compile_exp(a, m[:context])
-
-        m[:code] += compiled[:code]
-        m[:context] = compiled[:context]
-        m[:vars] << compiled[:last_var_used]
-      end
-
-      compiled_args.tap do |ca|
-        var = ca.dig(:context, :next_var_id)
-        fname = ca.dig(:context, :functions, original_name)
-
-        params_qty = ca[:vars].length
-        args = ca[:vars].each_with_index.map do |v, idx|
-          idx < params_qty - 1 ? "e_#{v}, " : "e_#{v}"
-        end
-
-        ca[:code] += "Term* e_#{var} = #{fname}(#{args.join});\n"
-        ca[:tag] = "e_#{var}"
-
-        ca[:context][:next_var_id] += 1
-      end
-    end
-
     private
 
     def build_signature(function, function_rename)
@@ -84,7 +57,7 @@ module Compilation
 
         function += <<~HEREDOC
               Term* e_#{var} = new Term();
-              e_#{var}->tag = 5;
+              e_#{var}->tag = #{current_context.dig(:tags, 'False')};
               e_#{var}->refcnt = 0;
               Term* res = e_#{var};
               incref(res);
@@ -100,11 +73,17 @@ module Compilation
       if arity.zero?
         compile_exp(kase[2], context)
       else
-        pcons = kase[1][0]
+        pconss = kase[1]
         compiled = compile_exp(kase[2], context, spaces_qty: 2)
 
+        conditions = pconss.each_with_index.map do |pcons, idx|
+          cond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
+          cond += ' && ' if idx < pconss.length - 1
+          cond
+        end
+
         code = <<~HEREDOC
-          #{spaces}if (x_0->tag == #{context.dig(:tags, pcons[1])}) {
+          #{spaces}if (#{conditions.join}) {
         HEREDOC
 
         code += compiled[:code]

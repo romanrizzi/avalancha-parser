@@ -56,12 +56,7 @@ module Pipeline
     def add_check_to(program, check)
       case check.first
       when 'print'
-        compiled = case check[1].first
-                   when 'cons'
-                     @ebuilder.compile(check[1], @context)
-                   when 'app'
-                     @fbuilder.compile_app(check[1], @context)
-                   end
+        compiled = @ebuilder.compile(check[1], @context)
 
         @context = compiled[:context]
         compiled_print = @cbuilder.compile_print(compiled[:tag])

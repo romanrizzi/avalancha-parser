@@ -37,10 +37,10 @@ module Compilation
 
     def generate_code(expression, children_ids, context, spaces_qty)
       type = expression[0]
+      var = context[:next_var_id]
 
       case type
       when 'cons'
-        var = context[:next_var_id]
         tag = context.dig(:tags, expression[1])
 
         expression = <<~HEREDOC
@@ -57,7 +57,14 @@ module Compilation
 
         expression
       when 'app'
-        Compilation::Functions.new.compile_app(expression, context)[:code]
+        fname = context.dig(:functions, expression[1])
+
+        params_qty = children_ids.length
+        args = children_ids.each_with_index.map do |v, idx|
+          idx < params_qty - 1 ? "e_#{v}, " : "e_#{v}"
+        end
+
+        "#{spaces}Term* e_#{var} = #{fname}(#{args.join});\n"
       end
     end
   end
