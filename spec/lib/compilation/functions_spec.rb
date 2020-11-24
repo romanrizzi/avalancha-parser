@@ -70,15 +70,60 @@ describe Compilation::Functions do
           Term* e_2 = new Term();
           e_2->tag = 5;
           e_2->refcnt = 0;
-          Term* res = e_2;
-          incref(res);
-          return res;
+          Term* failed_check = e_2;
+          incref(failed_check);
+          return failed_check;
       }
     HEREDOC
 
     compiledf = subject.compile(function, context)
 
     expect(compiledf[:signature]).to eq(expected_sig)
+    expect(compiledf[:code]).to eq(expected_fun)
+  end
+
+  it 'compiles a function with arguments' do
+    fun = [
+      'fun',
+      'sucsuc',
+      ['sig', ['_'], '_'],
+      ['pre', ['true']],
+      ['post', ['true']],
+      [
+        ['rule',
+         [%w[pvar x]],
+         ['cons', 'Suc', [['cons', 'Suc', [%w[var x]]]]]]
+      ]
+    ]
+
+    expected_fun = <<~HEREDOC
+      Term* f_0(Term* x_0) {
+          Term* e_0 = x_0;
+          incref(e_0);
+          Term* e_1 = new Term();
+          e_1->tag = 2;
+          e_1->refcnt = 0;
+          e_1->children.push_back(e_0);
+          Term* e_2 = new Term();
+          e_2->tag = 2;
+          e_2->refcnt = 0;
+          e_2->children.push_back(e_1);
+          Term* res = e_2;
+          incref(res);
+          return res;
+          
+
+          Term* e_3 = new Term();
+          e_3->tag = 5;
+          e_3->refcnt = 0;
+          Term* failed_check = e_3;
+          incref(failed_check);
+          return failed_check;
+      }
+    HEREDOC
+
+    compiledf = subject.compile(fun, context)
+
     expect(compiledf[:code]).to eq(expected_fun)
   end
 

@@ -5,7 +5,7 @@ module Compilation
     def compile(expression, context, spaces_qty: 1)
       current_context = context
 
-      children = expression[2].map do |e|
+      children = (expression[2] || []).map do |e|
         compile(e, current_context).tap do |compiled|
           current_context = compiled[:context]
         end
@@ -65,6 +65,13 @@ module Compilation
         end
 
         "#{spaces}Term* e_#{var} = #{fname}(#{args.join});\n"
+      when 'var'
+        arg_name = context.dig(:f_args, expression[1])
+
+        <<~HEREDOC
+          #{spaces}Term* e_#{context[:next_var_id]} = #{arg_name};
+          #{spaces}incref(e_#{context[:next_var_id]});
+        HEREDOC
       end
     end
   end

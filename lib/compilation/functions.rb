@@ -59,9 +59,9 @@ module Compilation
               Term* e_#{var} = new Term();
               e_#{var}->tag = #{current_context.dig(:tags, 'False')};
               e_#{var}->refcnt = 0;
-              Term* res = e_#{var};
-              incref(res);
-              return res;
+              Term* failed_check = e_#{var};
+              incref(failed_check);
+              return failed_check;
           }
         HEREDOC
       end
@@ -70,33 +70,55 @@ module Compilation
     end
 
     def build_case(kase, arity, context)
-      if arity.zero?
-        compile_exp(kase[2], context)
-      else
-        pconss = kase[1]
-        compiled = compile_exp(kase[2], context, spaces_qty: 2)
+      return compile_exp(kase[2], context) if arity.zero?
 
-        conditions = pconss.each_with_index.map do |pcons, idx|
-          cond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
-          cond += ' && ' if idx < pconss.length - 1
-          cond
-        end
+      new_context = add_pvars(context, kase[1])
+      conditions = compile_conditions(kase[1], new_context)
 
-        code = <<~HEREDOC
+      spaces_qty = conditions.empty? ? 1 : 2
+      compiled = compile_exp(kase[2], new_context, spaces_qty: spaces_qty)
+
+      code = ''
+
+      unless conditions.empty?
+        code += <<~HEREDOC
           #{spaces}if (#{conditions.join}) {
         HEREDOC
-
-        code += compiled[:code]
-
-        code += <<~HEREDOC
-          #{spaces * 2}Term* res = e_#{compiled.dig(:context, :next_var_id) - 1};
-          #{spaces * 2}incref(res);
-          #{spaces * 2}return res;
-          #{spaces}}\n
-        HEREDOC
-
-        compiled.tap { |c| c[:code] = code }
       end
+
+      code += compiled[:code]
+
+      code += <<~HEREDOC
+        #{spaces * spaces_qty}Term* res = e_#{compiled.dig(:context, :next_var_id) - 1};
+        #{spaces * spaces_qty}incref(res);
+        #{spaces * spaces_qty}return res;
+        #{spaces}#{conditions.empty? ? '' : '}'}\n
+      HEREDOC
+
+      compiled.tap { |c| c[:code] = code }
+    end
+
+    def compile_conditions(raw_conds, context)
+      pconss = raw_conds.reject { |p| %w[pvar pwild].include?(p[0]) }
+
+      pconss.each_with_index.map do |pcons, idx|
+        cond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
+        cond += ' && ' if idx < pconss.length - 1
+        cond
+      end
+    end
+
+    def add_pvars(context, args)
+      case_args = {}
+      arg_n = 0
+
+      args.each do |a|
+        case_args[a[1]] = "x_#{arg_n}" if a[0] == 'pvar'
+        arg_n += 1
+      end
+
+      context[:f_args] = case_args
+      context
     end
 
     def compile_exp(exp, context, spaces_qty: 1)
