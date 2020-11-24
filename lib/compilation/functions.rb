@@ -98,25 +98,30 @@ module Compilation
     end
 
     def compile_conditions(raw_conds, context)
-      pconss = raw_conds.reject { |p| %w[pvar pwild].include?(p[0]) }
+      actual_args = raw_conds.reject { |rc| %w[pvar pwild].include?(rc[0]) }.length
 
-      pconss.each_with_index.map do |pcons, idx|
-        kond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
-        kond += ' && ' if idx < pconss.length - 1
-        kond
+      raw_conds.each_with_index.each_with_object([]) do |(p, idx), m|
+        next if %w[pvar pwild].include?(p[0])
+
+        kond = "x_#{idx}->tag == #{context.dig(:tags, p[1])}"
+        kond += ' && ' if idx < actual_args - 1
+        m << kond
       end
     end
 
-    def add_pvars(context, args, children: false)
+    def add_pvars(context, args, children: false, arg_n: 0)
       current_context = context
+      arg = arg_n
 
-      args.each_with_index do |a, idx|
+      args.each do |a|
         case a[0]
         when 'pvar'
-          context[:f_vars][a[1]] = { name: "x_#{idx}", children: children }
+          current_context[:f_vars][a[1]] = { name: "x_#{arg}", children: children }
         when 'pcons'
-          current_context = add_pvars(context, a[2], children: true)
+          current_context = add_pvars(context, a[2], children: true, arg_n: arg)
         end
+
+        arg += 1
       end
 
       current_context
