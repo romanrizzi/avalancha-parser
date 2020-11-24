@@ -15,7 +15,7 @@ module Pipeline
       @ebuilder = Compilation::Expressions.new
       @cbuilder = Compilation::Checks.new
 
-      Compilation::Program.new(tags).tap do |program|
+      Compilation::Program.new(@context[:tags]).tap do |program|
         defs = ast[1]
         defs.each { |d| add_def_to(program, d) }
 
@@ -43,6 +43,8 @@ module Pipeline
     end
 
     def build_fresh_context(tags)
+      tags['False'] = tags.size if tags['False'].nil?
+
       {
         functions: {},
         next_fun_id: 0,

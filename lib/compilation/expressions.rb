@@ -66,10 +66,11 @@ module Compilation
 
         "#{spaces}Term* e_#{var} = #{fname}(#{args.join});\n"
       when 'var'
-        arg_name = context.dig(:f_args, expression[1])
+        arg = context.dig(:f_vars, expression[1])
+        arg_def = arg[:children] ? "#{arg[:name]}->children.front()" : arg[:name]
 
         <<~HEREDOC
-          #{spaces}Term* e_#{context[:next_var_id]} = #{arg_name};
+          #{spaces}Term* e_#{context[:next_var_id]} = #{arg_def};
           #{spaces}incref(e_#{context[:next_var_id]});
         HEREDOC
       end

@@ -6,15 +6,13 @@ module Compilation
       function_rename = "f_#{context[:next_fun_id]}"
       original_name = function[1]
 
+      context[:functions][original_name] = function_rename
+      context[:next_fun_id] += 1
+
       signature = build_signature(function, function_rename)
       function = build_function(function, signature, context)
 
-      new_context = function[:context]
-
-      new_context[:functions][original_name] = function_rename
-      new_context[:next_fun_id] += 1
-
-      { signature: [signature, ';'].join, code: function[:code], context: new_context }
+      { signature: [signature, ';'].join, code: function[:code], context: function[:context] }
     end
 
     private
@@ -72,6 +70,7 @@ module Compilation
     def build_case(kase, arity, context)
       return compile_exp(kase[2], context) if arity.zero?
 
+      context[:f_vars] = {}
       new_context = add_pvars(context, kase[1])
       conditions = compile_conditions(kase[1], new_context)
 
@@ -102,23 +101,25 @@ module Compilation
       pconss = raw_conds.reject { |p| %w[pvar pwild].include?(p[0]) }
 
       pconss.each_with_index.map do |pcons, idx|
-        cond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
-        cond += ' && ' if idx < pconss.length - 1
-        cond
+        kond = "x_#{idx}->tag == #{context.dig(:tags, pcons[1])}"
+        kond += ' && ' if idx < pconss.length - 1
+        kond
       end
     end
 
-    def add_pvars(context, args)
-      case_args = {}
-      arg_n = 0
+    def add_pvars(context, args, children: false)
+      current_context = context
 
-      args.each do |a|
-        case_args[a[1]] = "x_#{arg_n}" if a[0] == 'pvar'
-        arg_n += 1
+      args.each_with_index do |a, idx|
+        case a[0]
+        when 'pvar'
+          context[:f_vars][a[1]] = { name: "x_#{idx}", children: children }
+        when 'pcons'
+          current_context = add_pvars(context, a[2], children: true)
+        end
       end
 
-      context[:f_args] = case_args
-      context
+      current_context
     end
 
     def compile_exp(exp, context, spaces_qty: 1)
