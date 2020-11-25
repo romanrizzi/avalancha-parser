@@ -69,18 +69,15 @@ module Pipeline
     end
 
     def add_def_to(program, definition)
-      case definition.first
-      when 'fun'
-        # We can reuse var ids since we are inside a function.
-        local_context = @context.merge(next_var_id: 0)
+      # We can reuse var ids since we are inside a function.
+      local_context = @context.merge(next_var_id: 0)
 
-        compiled = @fbuilder.compile(definition, local_context)
+      compiled = @fbuilder.compile(definition, local_context)
 
-        @context = compiled[:context].merge(next_var_id: @context[:next_var_id])
+      @context = compiled[:context].merge(next_var_id: @context[:next_var_id])
 
-        program.add_prototype(compiled[:signature])
-        program.add_function(compiled[:code])
-      end
+      compiled[:signatures].each { |s| program.add_prototype(s) }
+      program.add_function(compiled[:code])
     end
   end
 end

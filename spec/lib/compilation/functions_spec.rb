@@ -6,33 +6,6 @@ require_relative '../../../lib/compilation/expressions'
 require_relative '../../../lib/pipeline/compiler'
 
 describe Compilation::Functions do
-  it 'compiles a simple function' do
-    rule = ['cons', 'Suc', [['cons', 'Zero', []]]]
-    function = [
-      'fun',
-      'uno',
-      ['sig', [], '_'],
-      ['pre', ['true']],
-      ['post', ['true']],
-      [
-        ['rule', [], rule]
-      ]
-    ]
-    expected_sig = 'Term* f_0();'
-    fun_body = Compilation::Expressions.new.compile(rule, context)
-    expected_fun = <<~HEREDOC
-      Term* f_0() {
-      #{fun_body[:code]}
-          return e_#{fun_body.dig(:context, :next_var_id) - 1};
-      }
-    HEREDOC
-
-    compiledf = subject.compile(function, context)
-
-    expect(compiledf[:signature]).to eq(expected_sig)
-    expect(compiledf[:code]).to eq(expected_fun)
-  end
-
   it 'compiles a function with multiple rules' do
     function = [
       'fun',
@@ -48,13 +21,23 @@ describe Compilation::Functions do
 
     expected_sig = 'Term* f_0(Term* x_0);'
     expected_fun = <<~HEREDOC
+      void pre_0(Term* x_0) {
+
+      }
+
+      void post_0(Term* x_0, Term* res) {
+
+      }
+
       Term* f_0(Term* x_0) {
+          pre_0(x_0);
           if (x_0->tag == 4) {
               Term* e_0 = new Term();
               e_0->tag = 5;
               e_0->refcnt = 0;
               Term* res = e_0;
               incref(res);
+              post_0(x_0, res);
               return res;
           }
 
@@ -64,6 +47,7 @@ describe Compilation::Functions do
               e_1->refcnt = 0;
               Term* res = e_1;
               incref(res);
+              post_0(x_0, res);
               return res;
           }
 
@@ -78,7 +62,7 @@ describe Compilation::Functions do
 
     compiledf = subject.compile(function, context)
 
-    expect(compiledf[:signature]).to eq(expected_sig)
+    expect(compiledf[:signatures].first).to eq(expected_sig)
     expect(compiledf[:code]).to eq(expected_fun)
   end
 
@@ -97,7 +81,16 @@ describe Compilation::Functions do
     ]
 
     expected_fun = <<~HEREDOC
+      void pre_0(Term* x_0) {
+
+      }
+
+      void post_0(Term* x_0, Term* res) {
+
+      }
+
       Term* f_0(Term* x_0) {
+          pre_0(x_0);
           Term* e_0 = x_0;
           incref(e_0);
           Term* e_1 = new Term();
@@ -110,6 +103,7 @@ describe Compilation::Functions do
           e_2->children.push_back(e_1);
           Term* res = e_2;
           incref(res);
+          post_0(x_0, res);
           return res;
           
 

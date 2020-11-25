@@ -96,7 +96,17 @@ module Compilation
         }
 
         bool eqTerms(Term* t1, Term* t2) {
-          return 1;
+          if (t1->children.size() != t2->children.size()) {
+            return false;
+          } else {
+            bool memo = t1->tag == t2->tag;  
+            
+            for(int i = 0; i < t1->children.size(); i++) {
+              memo = memo && eqTerms(t1->children[i], t2->children[i]);
+            }
+
+            return memo;
+          }
         }\n
       HEREDOC
     end

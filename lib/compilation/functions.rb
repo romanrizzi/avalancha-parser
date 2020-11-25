@@ -5,27 +5,71 @@ module Compilation
     def compile(function, context)
       function_rename = "f_#{context[:next_fun_id]}"
       original_name = function[1]
-
       context[:functions][original_name] = function_rename
-      context[:next_fun_id] += 1
+      raw_sig = function[2]
 
-      signature = build_signature(function, function_rename)
-      function = build_function(function, signature, context)
+      pre_name = "pre_#{context[:next_fun_id]}"
+      precondition = build_signature('void', raw_sig[1].length, pre_name)
+      compiled_pre = build_contract(function[3][1], precondition, context, original_name, 'pre')
 
-      { signature: [signature, ';'].join, code: function[:code], context: function[:context] }
+      post_name = "post_#{context[:next_fun_id]}"
+      postcondition = build_signature('void', raw_sig[1].length, post_name)
+      compiled_pos = build_contract(function[4][1], postcondition, context, original_name, 'post')
+
+      signature = build_signature('Term*', raw_sig[1].length, function_rename)
+      compiled_f = build_function(function, signature, context)
+
+      compiled_f[:context][:next_fun_id] += 1
+
+      {
+        signatures: [signature, precondition, postcondition].map! { |s| s[:sig] += ';' },
+        code: [compiled_pre, compiled_pos, compiled_f[:code]].join("\n"),
+        context: compiled_f[:context]
+      }
     end
 
     private
 
-    def build_signature(function, function_rename)
-      raw_sig = function[2]
-      params_qty = raw_sig[1].length
+    def build_contract(raw_contract, sig, context, original_name, type)
+      local_context = context.dup.merge(next_var_id: 0)
 
-      params = raw_sig[1].each_with_index.map do |_, idx|
-        idx < params_qty - 1 ? "Term* x_#{idx}, " : "Term* x_#{idx}"
+      f = <<~HEREDOC
+        #{sig[:sig]} {
+      HEREDOC
+
+      if raw_contract[0] != 'true'
+        l_side = compile_exp(raw_contract[1], local_context)
+        r_side = compile_exp(raw_contract[2], l_side[:context])
+
+        f += l_side[:code]
+        f += r_side[:code]
+
+        f += <<~HEREDOC
+          #{spaces}if (!eqTerms(#{l_side[:tag]}, #{r_side[:tag]})) {
+          #{spaces * 2}cout << "#{type}(#{original_name}) failed";
+          #{spaces * 2}exit(1);
+          #{spaces}}
+        HEREDOC
       end
 
-      "Term* #{function_rename}(#{params.join})"
+      <<~HEREDOC
+        #{f}
+        }
+      HEREDOC
+    end
+
+    def build_signature(return_type, args_qty, function_name)
+      params = []
+      args_qty.times { |idx| params << "x_#{idx}" }
+
+      params_with_type = params.map { |p| "Term* #{p}" }
+      params_with_type << 'Term* res' if function_name.include?('post_')
+      params_with_type = params_with_type.join(', ')
+
+      {
+        sig: "#{return_type} #{function_name}(#{params_with_type})",
+        args_without_type: params.join(', ')
+      }
     end
 
     def build_function(function, signature, context)
@@ -34,18 +78,19 @@ module Compilation
       current_context = context
 
       function = <<~HEREDOC
-        #{signature} {
+        #{signature[:sig]} {
+            pre_#{context[:next_fun_id]}(#{signature[:args_without_type]});
       HEREDOC
 
       function = body.reduce(function) do |f, c|
-        compiled_case = build_case(c, arity, context)
+        compiled_case = build_case(c, arity, context, signature)
         current_context = context
         f + compiled_case[:code]
       end
 
       if arity.zero?
         function += <<~HEREDOC
-
+              post_#{context[:next_fun_id]}(e_#{current_context[:next_var_id] - 1});
               return e_#{current_context[:next_var_id] - 1};
           }
         HEREDOC
@@ -67,7 +112,7 @@ module Compilation
       { code: function, context: current_context }
     end
 
-    def build_case(kase, arity, context)
+    def build_case(kase, arity, context, signature)
       return compile_exp(kase[2], context) if arity.zero?
 
       context[:f_vars] = {}
@@ -81,15 +126,16 @@ module Compilation
 
       unless conditions.empty?
         code += <<~HEREDOC
-          #{spaces}if (#{conditions.join}) {
+          #{spaces}if (#{conditions.join(' && ')}) {
         HEREDOC
       end
 
       code += compiled[:code]
 
       code += <<~HEREDOC
-        #{spaces * spaces_qty}Term* res = e_#{compiled.dig(:context, :next_var_id) - 1};
+        #{spaces * spaces_qty}Term* res = #{compiled[:tag]};
         #{spaces * spaces_qty}incref(res);
+        #{spaces * spaces_qty}post_#{context[:next_fun_id]}(#{signature[:args_without_type]}, res);
         #{spaces * spaces_qty}return res;
         #{spaces}#{conditions.empty? ? '' : '}'}\n
       HEREDOC
@@ -98,13 +144,10 @@ module Compilation
     end
 
     def compile_conditions(raw_conds, context)
-      actual_args = raw_conds.reject { |rc| %w[pvar pwild].include?(rc[0]) }.length
-
       raw_conds.each_with_index.each_with_object([]) do |(p, idx), m|
         next if %w[pvar pwild].include?(p[0])
 
         kond = "x_#{idx}->tag == #{context.dig(:tags, p[1])}"
-        kond += ' && ' if idx < actual_args - 1
         m << kond
       end
     end
