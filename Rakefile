@@ -31,3 +31,13 @@ task :print_compiled, [:path] do |_, args|
 
   puts "\n"
 end
+
+task :compile_and_run, [:path] do |_, args|
+  puts "-----  Compiling and running #{args[:path]} -----"
+  puts "\n"
+
+  program = Avalancha.build.compile_and_run(args[:path])
+  puts program
+
+  puts "\n"
+end
