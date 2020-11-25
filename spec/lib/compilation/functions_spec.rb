@@ -31,19 +31,10 @@ describe Compilation::Functions do
 
       Term* f_0(Term* x_0) {
           pre_0(x_0);
-          if (x_0->tag == 4) {
-              Term* e_0 = new Term();
-              e_0->tag = 5;
-              e_0->refcnt = 0;
-              Term* res = e_0;
-              incref(res);
-              post_0(x_0, res);
-              return res;
-          }
-
-          if (x_0->tag == 5) {
+          Term* e_0 = x_0;
+          if (e_0->tag == 4) {
               Term* e_1 = new Term();
-              e_1->tag = 4;
+              e_1->tag = 5;
               e_1->refcnt = 0;
               Term* res = e_1;
               incref(res);
@@ -51,16 +42,27 @@ describe Compilation::Functions do
               return res;
           }
 
-          Term* e_2 = new Term();
-          e_2->tag = 5;
-          e_2->refcnt = 0;
-          Term* failed_check = e_2;
+          Term* e_2 = x_0;
+          if (e_2->tag == 5) {
+              Term* e_3 = new Term();
+              e_3->tag = 4;
+              e_3->refcnt = 0;
+              Term* res = e_3;
+              incref(res);
+              post_0(x_0, res);
+              return res;
+          }
+
+          Term* e_4 = new Term();
+          e_4->tag = 5;
+          e_4->refcnt = 0;
+          Term* failed_check = e_4;
           incref(failed_check);
           return failed_check;
       }
     HEREDOC
 
-    compiledf = subject.compile(function, context)
+    compiledf = subject.compile(function, context('neg'))
 
     expect(compiledf[:signatures].first).to eq(expected_sig)
     expect(compiledf[:code]).to eq(expected_fun)
@@ -116,13 +118,15 @@ describe Compilation::Functions do
       }
     HEREDOC
 
-    compiledf = subject.compile(fun, context)
+    compiledf = subject.compile(fun, context('sucsuc'))
 
     expect(compiledf[:code]).to eq(expected_fun)
   end
 
-  def context
+  def context(fun_name)
     tags = { 'Cons' => 0, 'Zero' => 1, 'Suc' => 2, 'Nil' => 3, 'True' => 4, 'False' => 5 }
-    Pipeline::Compiler.new.build_fresh_context(tags)
+    Pipeline::Compiler.new.build_fresh_context(tags).tap do |c|
+      c[:functions] = { fun_name => 'f_0' }
+    end
   end
 end

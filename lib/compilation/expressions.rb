@@ -5,7 +5,9 @@ module Compilation
     def compile(expression, context, spaces_qty: 1)
       current_context = context
 
-      children = (expression[2] || []).map do |e|
+      children = binary_expression?(expression[0]) ? expression[1..-1] : expression[2]
+
+      children = (children || []).map do |e|
         compile(e, current_context).tap do |compiled|
           current_context = compiled[:context]
         end
@@ -17,25 +19,74 @@ module Compilation
 
       code += generate_code(
         expression,
-        children.map { |c| c[:last_var_used] },
+        children.map { |c| c[:tag] },
         current_context,
         spaces_qty
       )
 
       current_context[:next_var_id] += 1
 
-      { code: code, last_var_used: current, tag: "e_#{current}", context: current_context }
+      { code: code, tag: "e_#{current}", context: current_context }
+    end
+
+    def deconstruct(patterns, context, vars)
+      code = ''
+      current_context = context
+
+      patterns.each_with_index do |p, idx|
+        next if p.first == 'pwild'
+
+        compiled = compile_pattern(p, current_context, vars[idx])
+
+        current_context = compiled[:context]
+        code += compiled[:code]
+
+        next unless p.first != 'pvar'
+
+        compiled_subpattern = deconstruct(p[2], compiled[:context], compiled[:next_vars])
+        code += compiled_subpattern[:code]
+        current_context = compiled_subpattern[:context]
+      end
+
+      { code: code, context: current_context }
     end
 
     private
 
     attr_reader :tags
 
+    def binary_expression?(name)
+      %w[and equal].include?(name)
+    end
+
     def spaces
       "\x20\x20\x20\x20"
     end
 
-    def generate_code(expression, children_ids, context, spaces_qty)
+    def compile_pattern(pattern, context, val)
+      return { code: '', context: context } if pattern.empty?
+
+      case pattern.first
+      when 'pcons'
+        var = context[:next_var_id]
+        context[:next_var_id] += 1
+
+        code = <<~HEREDOC
+          #{spaces}Term* e_#{var} = #{val};
+        HEREDOC
+
+        context[:conditions]["e_#{var}"] = context.dig(:tags, pattern[1])
+        next_vars = pattern[2].each_with_index.map { |_p, idx| "e_#{var}->children[#{idx}]" }
+
+        { code: code, context: context, next_vars: next_vars }
+      when 'pvar'
+        context[:binded_vars][pattern[1]] = val
+
+        { code: '', context: context }
+      end
+    end
+
+    def generate_code(expression, children_vars, context, spaces_qty)
       type = expression[0]
       var = context[:next_var_id]
 
@@ -49,9 +100,9 @@ module Compilation
           #{spaces * spaces_qty}e_#{var}->refcnt = 0;
         HEREDOC
 
-        children_ids.each do |idx|
+        children_vars.each do |cv|
           expression += <<~HEREDOC
-            #{spaces * spaces_qty}e_#{var}->children.push_back(e_#{idx});
+            #{spaces * spaces_qty}e_#{var}->children.push_back(#{cv});
           HEREDOC
         end
 
@@ -59,19 +110,21 @@ module Compilation
       when 'app'
         fname = context.dig(:functions, expression[1])
 
-        params_qty = children_ids.length
-        args = children_ids.each_with_index.map do |v, idx|
-          idx < params_qty - 1 ? "e_#{v}, " : "e_#{v}"
-        end
-
-        "#{spaces}Term* e_#{var} = #{fname}(#{args.join});\n"
+        "#{spaces}Term* e_#{var} = #{fname}(#{children_vars.join(', ')});\n"
       when 'var'
-        arg = context.dig(:f_vars, expression[1])
-        arg_def = arg[:children] ? "#{arg[:name]}->children.front()" : arg[:name]
+        binded_var = context.dig(:binded_vars, expression[1])
 
         <<~HEREDOC
-          #{spaces}Term* e_#{context[:next_var_id]} = #{arg_def};
-          #{spaces}incref(e_#{context[:next_var_id]});
+          #{spaces}Term* e_#{var} = #{binded_var};
+          #{spaces}incref(e_#{var});
+        HEREDOC
+      when 'equal'
+        <<~HEREDOC
+          #{spaces}bool e_#{var} = eqTerms(#{children_vars.join(', ')});
+        HEREDOC
+      when 'and'
+        <<~HEREDOC
+          #{spaces}bool e_#{var} = #{children_vars.join(' && ')};
         HEREDOC
       end
     end

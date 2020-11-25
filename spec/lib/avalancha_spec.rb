@@ -35,7 +35,8 @@ describe Avalancha do
 
     %w[
       01 02 03 04 05 06
-      07 08 09 10
+      07 08 09 10 11 12
+      13
     ].each do |test_name|
       it "passes #{test_name}" do
         assert_compiles_test_file(folder, test_name)

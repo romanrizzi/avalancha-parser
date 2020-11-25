@@ -17,6 +17,7 @@ module Pipeline
 
       Compilation::Program.new(@context[:tags]).tap do |program|
         defs = ast[1]
+        register_functions(defs, @context)
         defs.each { |d| add_def_to(program, d) }
 
         checks = ast[2]
@@ -54,6 +55,15 @@ module Pipeline
     end
 
     private
+
+    def register_functions(defs, context)
+      defs.each do |d|
+        function_rename = "f_#{context[:next_fun_id]}"
+        original_name = d[1]
+        context[:functions][original_name] = function_rename
+        context[:next_fun_id] += 1
+      end
+    end
 
     def add_check_to(program, check)
       case check.first
