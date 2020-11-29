@@ -71,11 +71,18 @@ module Compilation
     def define_utility_functions
       @code += <<~HEREDOC
         void incref(Term* t) {
-            t->refcnt = t->refcnt++;
+            t->refcnt++;
         }
 
         void decref(Term* t) {
-            
+            t->refcnt--;
+
+            if (t->refcnt == 0) {
+                for(int i = 0; i < t->children.size(); i++) {
+                    decref(t->children[i]);
+                }
+                delete t;
+            }
         }
 
         void printTerm(Term* t, std::map<int, std::string> tags) {
