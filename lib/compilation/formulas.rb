@@ -14,8 +14,6 @@ module Compilation
           end
         end
 
-        current = current_context[:next_var_id]
-
         code = children.reduce('') { |m, c| m + c[:code] }
         code += generate_code(
           expression,
@@ -24,6 +22,7 @@ module Compilation
           spaces_qty
         )
 
+        current = current_context[:next_var_id]
         current_context[:next_var_id] += 1
 
         { code: code, tag: "e_#{current}", context: current_context }
@@ -56,13 +55,38 @@ module Compilation
 
       case type
       when 'equal'
-        "#{spaces * spaces_qty}bool e_#{var} = eqTerms(#{children_vars.join(', ')});"
+        context[:next_var_id] += 2
+
+        <<~HEREDOC
+          #{spaces * spaces_qty}Term* e_#{var} = #{children_vars[0]};
+          #{spaces * spaces_qty}incref(e_#{var});
+          #{spaces * spaces_qty}Term* e_#{var + 1} = #{children_vars[1]};
+          #{spaces * spaces_qty}incref(e_#{var + 1});
+          #{spaces * spaces_qty}bool e_#{var + 2} = eqTerms(e_#{var}, e_#{var + 1});
+          #{spaces * spaces_qty}decref(e_#{var});
+          #{spaces * spaces_qty}decref(e_#{var + 1});
+        HEREDOC
       when 'and'
-        "#{spaces * spaces_qty}bool e_#{var} = #{children_vars.join(' && ')};"
+        <<~HEREDOC
+          #{spaces * spaces_qty}bool e_#{var} = #{children_vars[0]};
+          #{spaces * spaces_qty}if (e_#{var}) {
+          #{spaces * (spaces_qty + 1)}bool e_#{var} = #{children_vars[1]};
+          #{spaces * spaces_qty}}
+        HEREDOC
       when 'or'
-        "#{spaces * spaces_qty}bool e_#{var} = #{children_vars.join(' || ')};"
+        <<~HEREDOC
+          #{spaces * spaces_qty}bool e_#{var} = #{children_vars[0]};
+          #{spaces * spaces_qty}if (!e_#{var}) {
+          #{spaces * (spaces_qty + 1)}bool e_#{var} = #{children_vars[1]};
+          #{spaces * spaces_qty}}
+        HEREDOC
       when 'imp'
-        "#{spaces * spaces_qty}bool e_#{var} = !#{children_vars[0]} || #{children_vars[1]};"
+        <<~HEREDOC
+          #{spaces * spaces_qty}bool e_#{var} = !#{children_vars[0]};
+          #{spaces * spaces_qty}if (!e_#{var}) {
+          #{spaces * (spaces_qty + 1)}bool e_#{var} = #{children_vars[1]};
+          #{spaces * spaces_qty}}
+        HEREDOC
       when 'not'
         "#{spaces * spaces_qty}bool e_#{var} = !#{children_vars[0]};"
       end
