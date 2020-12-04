@@ -77,7 +77,7 @@ module Compilation
         void decref(Term* t) {
             t->refcnt--;
 
-            if (t->refcnt == 0) {
+            if (t->refcnt <= 0) {
                 for(int i = 0; i < t->children.size(); i++) {
                     decref(t->children[i]);
                 }

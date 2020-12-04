@@ -94,6 +94,7 @@ module Compilation
 
         children_vars.each do |cv|
           expression += <<~HEREDOC
+            #{spaces * spaces_qty}incref(#{cv});
             #{spaces * spaces_qty}e_#{var}->children.push_back(#{cv});
           HEREDOC
         end
@@ -101,14 +102,30 @@ module Compilation
         expression
       when 'app'
         fname = context.dig(:functions, expression[1])
+        expression = ''
 
-        "#{spaces}Term* e_#{var} = #{fname}(#{children_vars.join(', ')});\n"
+        children_vars.each do |cv|
+          expression += <<~HEREDOC
+            #{spaces * spaces_qty}incref(#{cv});
+          HEREDOC
+        end
+
+        expression += <<~HEREDOC
+          #{spaces * spaces_qty}Term* e_#{var} = #{fname}(#{children_vars.join(', ')});
+        HEREDOC
+
+        children_vars.each do |cv|
+          expression += <<~HEREDOC
+            #{spaces * spaces_qty}decref(#{cv});
+          HEREDOC
+        end
+
+        expression += "#{spaces * spaces_qty}e_#{var}->refcnt--;\n"
       when 'var'
         binded_var = context.dig(:binded_vars, expression[1])
 
         <<~HEREDOC
-          #{spaces}Term* e_#{var} = #{binded_var};
-          #{spaces}incref(e_#{var});
+          #{spaces * spaces_qty}Term* e_#{var} = #{binded_var};
         HEREDOC
       end
     end

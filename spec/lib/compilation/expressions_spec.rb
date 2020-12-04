@@ -71,10 +71,22 @@ describe Compilation::Expressions do
       \x20\x20\x20\x20Term* e_0 = new Term();
       \x20\x20\x20\x20e_0->tag = 1;
       \x20\x20\x20\x20e_0->refcnt = 0;
+      \x20\x20\x20\x20incref(e_0);
       \x20\x20\x20\x20Term* e_1 = f_0(e_0);
+      \x20\x20\x20\x20decref(e_0);
+      \x20\x20\x20\x20e_1->refcnt--;
+      \x20\x20\x20\x20incref(e_1);
       \x20\x20\x20\x20Term* e_2 = f_0(e_1);
+      \x20\x20\x20\x20decref(e_1);
+      \x20\x20\x20\x20e_2->refcnt--;
+      \x20\x20\x20\x20incref(e_2);
       \x20\x20\x20\x20Term* e_3 = f_0(e_2);
+      \x20\x20\x20\x20decref(e_2);
+      \x20\x20\x20\x20e_3->refcnt--;
+      \x20\x20\x20\x20incref(e_3);
       \x20\x20\x20\x20Term* e_4 = f_0(e_3);
+      \x20\x20\x20\x20decref(e_3);
+      \x20\x20\x20\x20e_4->refcnt--;
     HEREDOC
 
     expect(subject.compile(app, fcontext)[:code]).to eq(result)
@@ -86,7 +98,10 @@ describe Compilation::Expressions do
   end
 
   def build_app(var, f_name)
-    "\x20\x20\x20\x20Term* e_#{var} = #{f_name}();\n"
+    <<~HEREDOC
+      \x20\x20\x20\x20Term* e_#{var} = #{f_name}();
+      \x20\x20\x20\x20e_#{var}->refcnt--;
+    HEREDOC
   end
 
   def build_expression(tag, var, children)
@@ -98,6 +113,7 @@ describe Compilation::Expressions do
 
     children.each do |c|
       expression += <<~HEREDOC
+        \x20\x20\x20\x20incref(e_#{c});
         \x20\x20\x20\x20e_#{var}->children.push_back(e_#{c});
       HEREDOC
     end
