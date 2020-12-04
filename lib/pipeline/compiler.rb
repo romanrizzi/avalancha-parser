@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'tempfile'
+require_relative '../compilation/formulas'
 require_relative '../compilation/program'
 require_relative '../compilation/expressions'
 require_relative '../compilation/functions'
@@ -10,10 +11,6 @@ module Pipeline
   class Compiler
     def compile(tags, ast)
       @context = build_fresh_context(tags)
-
-      @fbuilder = Compilation::Functions.new
-      @ebuilder = Compilation::Expressions.new
-      @cbuilder = Compilation::Checks.new
 
       Compilation::Program.new(@context[:tags]).tap do |program|
         defs = ast[1]
@@ -67,14 +64,19 @@ module Pipeline
     end
 
     def add_check_to(program, check)
-      compiled = @ebuilder.compile(check[1], @context)
-      @context = compiled[:context]
+      cbuilder = Compilation::Checks.new
 
       compiled_check = case check.first
                        when 'print'
-                         @cbuilder.compile_print(compiled[:tag])
+                         compiled = Compilation::Expressions.new.compile(check[1], @context)
+                         @context = compiled[:context]
+
+                         cbuilder.compile_print(compiled[:tag])
                        when 'check'
-                         @cbuilder.compile_check(compiled[:tag])
+                         compiled = Compilation::Formulas.new.compile(check[1], @context)
+                         @context = compiled[:context]
+
+                         cbuilder.compile_check(compiled[:tag])
                        end
 
       program.add_check(compiled[:code])
@@ -85,7 +87,7 @@ module Pipeline
       # We can reuse var ids since we are inside a function.
       local_context = @context.merge(next_var_id: 0)
 
-      compiled = @fbuilder.compile(definition, local_context)
+      compiled = Compilation::Functions.new.compile(definition, local_context)
 
       @context = compiled[:context].merge(next_var_id: @context[:next_var_id])
 

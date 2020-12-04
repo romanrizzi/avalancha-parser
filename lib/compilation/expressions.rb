@@ -5,15 +5,7 @@ module Compilation
     def compile(expression, context, spaces_qty: 1)
       current_context = context
 
-      children = if expression[0] == 'not'
-                   [expression[1]]
-                 elsif binary_expression?(expression[0])
-                   expression[1..-1]
-                 else
-                   expression[2]
-                 end
-
-      children = (children || []).map do |e|
+      children = (expression[2] || []).map do |e|
         compile(e, current_context).tap do |compiled|
           current_context = compiled[:context]
         end
@@ -47,7 +39,7 @@ module Compilation
         current_context = compiled[:context]
         code += compiled[:code]
 
-        next unless p.first != 'pvar'
+        next if p.first == 'pvar'
 
         compiled_subpattern = deconstruct(p[2], compiled[:context], compiled[:next_vars])
         code += compiled_subpattern[:code]
@@ -58,12 +50,6 @@ module Compilation
     end
 
     private
-
-    attr_reader :tags
-
-    def binary_expression?(name)
-      %w[and equal or imp].include?(name)
-    end
 
     def spaces
       "\x20\x20\x20\x20"
@@ -124,16 +110,6 @@ module Compilation
           #{spaces}Term* e_#{var} = #{binded_var};
           #{spaces}incref(e_#{var});
         HEREDOC
-      when 'equal'
-        "#{spaces}bool e_#{var} = eqTerms(#{children_vars.join(', ')});"
-      when 'and'
-        "#{spaces}bool e_#{var} = #{children_vars.join(' && ')};"
-      when 'or'
-        "#{spaces}bool e_#{var} = #{children_vars.join(' || ')};"
-      when 'imp'
-        "#{spaces}bool e_#{var} = !#{children_vars[0]} || #{children_vars[1]};"
-      when 'not'
-        "#{spaces}bool e_#{var} = !#{children_vars[0]};"
       end
     end
   end

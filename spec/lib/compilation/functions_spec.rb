@@ -2,7 +2,6 @@
 
 require 'spec_helper'
 require_relative '../../../lib/compilation/functions'
-require_relative '../../../lib/compilation/expressions'
 require_relative '../../../lib/pipeline/compiler'
 
 describe Compilation::Functions do

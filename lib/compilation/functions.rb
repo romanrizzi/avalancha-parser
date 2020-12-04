@@ -40,7 +40,7 @@ module Compilation
         end
         local_context[:binded_vars][sig[:raw_sig][2]] = 'res'
 
-        compiled = compile_exp(raw_contract, local_context)
+        compiled = compile_formula(raw_contract, local_context)
 
         f += compiled[:code]
 
@@ -156,6 +156,10 @@ module Compilation
 
     def ebuilder
       @ebuilder ||= Compilation::Expressions.new
+    end
+
+    def compile_formula(fun, context, spaces_qty: 1)
+      Compilation::Formulas.new.compile(fun, context, spaces_qty: spaces_qty)
     end
 
     def spaces
