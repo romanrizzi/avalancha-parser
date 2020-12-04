@@ -5,7 +5,13 @@ module Compilation
     def compile(expression, context, spaces_qty: 1)
       current_context = context
 
-      children = binary_expression?(expression[0]) ? expression[1..-1] : expression[2]
+      children = if expression[0] == 'not'
+                   [expression[1]]
+                 elsif binary_expression?(expression[0])
+                   expression[1..-1]
+                 else
+                   expression[2]
+                 end
 
       children = (children || []).map do |e|
         compile(e, current_context).tap do |compiled|
@@ -56,7 +62,7 @@ module Compilation
     attr_reader :tags
 
     def binary_expression?(name)
-      %w[and equal].include?(name)
+      %w[and equal or imp].include?(name)
     end
 
     def spaces
@@ -119,13 +125,15 @@ module Compilation
           #{spaces}incref(e_#{var});
         HEREDOC
       when 'equal'
-        <<~HEREDOC
-          #{spaces}bool e_#{var} = eqTerms(#{children_vars.join(', ')});
-        HEREDOC
+        "#{spaces}bool e_#{var} = eqTerms(#{children_vars.join(', ')});"
       when 'and'
-        <<~HEREDOC
-          #{spaces}bool e_#{var} = #{children_vars.join(' && ')};
-        HEREDOC
+        "#{spaces}bool e_#{var} = #{children_vars.join(' && ')};"
+      when 'or'
+        "#{spaces}bool e_#{var} = #{children_vars.join(' || ')};"
+      when 'imp'
+        "#{spaces}bool e_#{var} = !#{children_vars[0]} || #{children_vars[1]};"
+      when 'not'
+        "#{spaces}bool e_#{var} = !#{children_vars[0]};"
       end
     end
   end

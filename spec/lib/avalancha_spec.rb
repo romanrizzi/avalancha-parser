@@ -43,6 +43,12 @@ describe Avalancha do
       end
     end
 
+    it 'works with check and formulas' do
+      instance.compile_and_run(build_path('parser', 'test08', 'input'))
+      instance.compile_and_run(build_path('parser', 'test09', 'input'))
+      instance.compile_and_run(build_path('parser', 'test10', 'input'))
+    end
+
     def assert_compiles_test_file(folder, test_name)
       result = instance.compile_and_run(build_path(folder, test_name, 'input')).split("\n")
 

@@ -11,6 +11,15 @@ module Compilation
       HEREDOC
     end
 
+    def compile_check(arg)
+      <<~HEREDOC
+        #{spaces}if (!#{arg}) {
+        #{spaces * 2}cout << "check failed" << "\\n";
+        #{spaces * 2}exit(1);
+        #{spaces}}
+      HEREDOC
+    end
+
     private
 
     def spaces

@@ -45,6 +45,7 @@ module Pipeline
 
     def build_fresh_context(tags)
       tags['False'] = tags.size if tags['False'].nil?
+      tags['True'] = tags.size if tags['True'].nil?
 
       {
         functions: {},
@@ -66,16 +67,18 @@ module Pipeline
     end
 
     def add_check_to(program, check)
-      case check.first
-      when 'print'
-        compiled = @ebuilder.compile(check[1], @context)
+      compiled = @ebuilder.compile(check[1], @context)
+      @context = compiled[:context]
 
-        @context = compiled[:context]
-        compiled_print = @cbuilder.compile_print(compiled[:tag])
+      compiled_check = case check.first
+                       when 'print'
+                         @cbuilder.compile_print(compiled[:tag])
+                       when 'check'
+                         @cbuilder.compile_check(compiled[:tag])
+                       end
 
-        program.add_check(compiled[:code])
-        program.add_check(compiled_print)
-      end
+      program.add_check(compiled[:code])
+      program.add_check(compiled_check)
     end
 
     def add_def_to(program, definition)
