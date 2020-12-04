@@ -126,6 +126,7 @@ module Compilation
 
         <<~HEREDOC
           #{spaces * spaces_qty}Term* e_#{var} = #{binded_var};
+          #{spaces * spaces_qty}incref(e_#{var});
         HEREDOC
       end
     end

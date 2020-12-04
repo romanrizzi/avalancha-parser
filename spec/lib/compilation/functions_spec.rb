@@ -93,6 +93,7 @@ describe Compilation::Functions do
       Term* f_0(Term* x_0) {
           pre_0(x_0);
           Term* e_0 = x_0;
+          incref(e_0);
           Term* e_1 = new Term();
           e_1->tag = 2;
           e_1->refcnt = 0;
